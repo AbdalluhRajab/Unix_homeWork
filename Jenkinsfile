@@ -48,8 +48,7 @@ pipeline {
                         echo "Waiting for MySQL... ($i/30)"
                         sleep 2
                     done
-                    docker cp db.sql sum_app_db:/tmp/db.sql
-                    docker exec sum_app_db sh -c "mysql -uroot -proot < /tmp/db.sql"
+                    docker exec -i sum_app_db mysql -uroot -proot < db.sql
                     echo "Database schema applied."
                 '''
             }
