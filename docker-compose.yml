@@ -1,0 +1,27 @@
+services:
+  web:
+    build: .
+    container_name: sum_app_web
+    restart: always
+    ports:
+      - "8081:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    container_name: sum_app_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sum_app
+      MYSQL_USER: sumuser
+      MYSQL_PASSWORD: 12345
+    volumes:
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "sumuser", "-p12345"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
