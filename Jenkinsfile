@@ -9,13 +9,6 @@ pipeline {
             }
         }
 
-        stage('Check PHP Syntax') {
-            steps {
-                echo 'Checking PHP syntax...'
-                sh 'docker run --rm -v "$PWD":/app -w /app php:8.2-cli php -l index.php'
-            }
-        }
-
         stage('Build Docker Containers') {
             steps {
                 echo 'Building Docker containers...'
@@ -23,14 +16,21 @@ pipeline {
             }
         }
 
-     stage('Deploy Application') {
-    steps {
-        echo 'Deploying application using Docker...'
-        sh 'docker rm -f sum_app_web sum_app_db || true'
-        sh 'docker compose down || true'
-        sh 'docker compose up -d --build'
-    }
-}
+        stage('Check PHP Syntax') {
+            steps {
+                echo 'Checking PHP syntax inside the built image...'
+                sh 'docker compose run --rm --no-deps web php -l index.php'
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                echo 'Deploying application using Docker...'
+                sh 'docker rm -f sum_app_web sum_app_db || true'
+                sh 'docker compose down --remove-orphans || true'
+                sh 'docker compose up -d --force-recreate'
+            }
+        }
 
         stage('Verify Containers') {
             steps {
