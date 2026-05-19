@@ -1,17 +1,17 @@
 services:
   web:
     build: .
+    container_name: sum_app_web
     restart: always
     ports:
       - "8090:80"
-    volumes:
-      - .:/var/www/html
     depends_on:
       db:
         condition: service_healthy
 
   db:
     image: mysql:8.0
+    container_name: sum_app_db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root

@@ -16,23 +16,23 @@ pipeline {
         stage('Build Docker Containers') {
             steps {
                 echo 'Building Docker containers...'
-                sh 'docker compose build'
+                sh 'docker compose -f docker-compose.yml build'
             }
         }
 
         stage('Check PHP Syntax') {
             steps {
                 echo 'Checking PHP syntax inside the built image...'
-                sh 'docker compose run --rm --no-deps web php -l index.php'
+                sh 'docker run --rm workspace-web php -l /var/www/html/index.php'
             }
         }
 
         stage('Deploy Application') {
             steps {
                 echo 'Deploying application using Docker...'
-                sh 'docker rm -f sum_app_web sum_app_db || true'
-                sh 'docker compose down --remove-orphans -v || true'
-                sh 'docker compose up -d --force-recreate'
+                sh 'docker rm -f sum_app_web sum_app_db unix_homework-web-1 unix_homework-db-1 || true'
+                sh 'docker compose -f docker-compose.yml down --remove-orphans -v || true'
+                sh 'docker compose -f docker-compose.yml up -d --force-recreate'
             }
         }
 
@@ -48,7 +48,8 @@ pipeline {
                         echo "Waiting for MySQL user setup... ($i/60)"
                         sleep 2
                     done
-                    docker exec -i sum_app_db mysql -usumuser -p12345 sum_app < db.sql
+                    docker cp db.sql sum_app_db:/tmp/db.sql
+                    docker exec sum_app_db sh -c 'mysql -usumuser -p12345 sum_app < /tmp/db.sql'
                     echo "Database schema applied."
                 '''
             }
@@ -61,4 +62,4 @@ pipeline {
             }
         }
     }
-    }
+}
