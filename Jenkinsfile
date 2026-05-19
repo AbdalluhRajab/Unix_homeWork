@@ -12,7 +12,7 @@ pipeline {
         stage('Check PHP Syntax') {
             steps {
                 echo 'Checking PHP syntax...'
-                sh 'php -l index.php'
+                sh 'docker run --rm -v "$PWD":/app -w /app php:8.2-cli php -l index.php'
             }
         }
 
