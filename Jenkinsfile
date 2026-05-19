@@ -41,14 +41,14 @@ pipeline {
                 echo 'Waiting for MySQL to be ready and applying schema...'
                 sh '''
                     for i in $(seq 1 30); do
-                        if docker exec sum_app_db mysqladmin ping -uroot -proot --silent 2>/dev/null; then
+                        if docker exec sum_app_db mysqladmin ping -usumuser -p12345 --silent 2>/dev/null; then
                             echo "MySQL is ready."
                             break
                         fi
                         echo "Waiting for MySQL... ($i/30)"
                         sleep 2
                     done
-                    docker exec -i sum_app_db mysql -uroot -proot < db.sql
+                    docker exec -i sum_app_db mysql -usumuser -p12345 sum_app < db.sql
                     echo "Database schema applied."
                 '''
             }
